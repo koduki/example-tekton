@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: show-readme
+  description: Read and display README file.
+spec:
+  # workspaces:
+  # - name: source
+  steps:
+  - name: read1
+    image: alpine:latest
+    script: | 
+      #!/usr/bin/env sh
+      cd workspace
+      pwd
+      echo "Hello World1" > hoge.txt
+      ls -l
+  - name: read2
+    image: alpine:latest
+    script: | 
+      #!/usr/bin/env sh
+      cd workspace
+      ls -l
+      cat hoge.txt

@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: clone-read-run5
+spec:
+  pipelineRef:
+    name: clone-read
+  # workspaces:
+  # - name: shared-data
+  #   volumeClaimTemplate:
+  #     spec:
+  #       accessModes:
+  #       - ReadWriteOnce
+  #       resources:
+  #         requests:
+  #           storage: 100mi
+  params:
+  - name: repo-url
+    value: git@github.com:tektoncd/website.git

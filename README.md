@@ -48,6 +48,10 @@ kubectl create secret docker-registry regcred \
                     --docker-password="$(cat ~/key.json)" \
                     --docker-email=koduki@nklab.dev
 
+kubectl create secret docker-registry docker-credential \
+                    --docker-server=https://index.docker.io/v1/ \
+                    --docker-username={ID} \
+                    --docker-password={パスワード}
 
 asia.gcr.io 
 

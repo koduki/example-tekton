@@ -1,0 +1,55 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sample-java-build
+  description: An example of Java Build with maven
+spec:
+  params:
+  - name: repo-url
+    type: string
+    description: The git repo URL to clone from.
+  steps:
+  - name: git-clone
+    image: alpine/git
+    workingDir: /workspace
+    script: | 
+      #!/usr/bin/env sh
+      echo "repos-url: "$(params.repo-url)
+      git clone $(params.repo-url)
+  - name: java-build
+    image: openjdk
+    workingDir: /workspace
+    script: | 
+      #!/usr/bin/env sh
+      cd quarkus-quickstarts/getting-started
+      ./mvnw package
+      # mkdir -p target/quarkus-app
+      # touch target/quarkus-app/quarkus-run.jar
+  - name: container-pre
+    image: debian
+    workingDir: /workspace
+    script: | 
+      #!/usr/bin/env sh
+      cd quarkus-quickstarts/getting-started
+
+      cat << EOF > ./Dockerfile
+        FROM openjdk
+
+        RUN mkdir /app
+        ADD target/quarkus-app /app
+
+        CMD [ "java", "-jar", "/app/quarkus-run.jar"]
+      EOF
+  - name: container-build-and-push
+    image: gcr.io/kaniko-project/executor:latest
+    workingDir: /workspace
+    env:
+      - name: "DOCKER_CONFIG"
+        value: "/root/.docker"
+    command:
+      - /kaniko/executor
+    args:
+      - --dockerfile=Dockerfile
+      - --destination=koduki/getting-started
+      - --context=quarkus-quickstarts/getting-started/
+      - --cache=true

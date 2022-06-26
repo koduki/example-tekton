@@ -1,0 +1,36 @@
+# workspace-test-task.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: workspace-test-task-curl
+spec:
+  params:
+    - name: url
+      type: string
+  workspaces:
+    - name: my-workspace
+  steps:
+    - name: curl
+      image: fedora:latest
+      command:
+        - curl
+      args:
+        - "-I"
+        - "$(params.url)"
+        - "-o"
+        - "$(workspaces.my-workspace.path)/output.txt"
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: workspace-test-task-output
+spec:
+  workspaces:
+    - name: my-workspace
+  steps:
+    - name: output
+      image: fedora
+      command:
+        - cat
+      args:
+        - "$(workspaces.my-workspace.path)/output.txt"

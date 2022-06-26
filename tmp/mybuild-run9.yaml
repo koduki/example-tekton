@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: run-sample-java-build9
+spec:
+  serviceAccountName: build-bot
+  taskRef:
+    name: sample-java-build
+  params:
+  - name: repo-url
+    value: https://github.com/quarkusio/quarkus-quickstarts.git
