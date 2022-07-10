@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pipeline-echo
+spec:
+  description: | 
+    This pipeline is a simple echo to STDOUT.
+  params:
+  - name: name
+    type: string
+    description: Your Name for print.
+  - name: message
+    type: string
+    description: This is a message for print.
+  tasks:
+  - name: my-echo
+    taskRef:
+      name: my-echo
+    params:
+      - name: name
+        value: "$(params.name)"
+      - name: message
+        value: "$(params.message)"

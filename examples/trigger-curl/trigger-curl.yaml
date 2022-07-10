@@ -1,0 +1,51 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: template-curl-trigger
+spec:
+  params:
+    - name: name
+      description: Your Name for print.
+    - name: message
+      description: This is a message for print.
+      default: hello, world
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        # Autogenerate Pipeline Run Name with unique ID as pipeline-run-curl-{Rondom ID}.
+        generateName: pipeline-run-curl-
+      spec:
+        pipelineRef:
+          name: pipeline-echo
+        params: 
+          # `tt` is `trigger template`
+          - name: name
+            value: $(tt.params.name)
+          - name: message
+            value: $(tt.params.message)
+        serviceAccountName: sa-buildbot
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: binding-curl-trigger
+spec:
+  params:
+    # Binding from HTTP Rquests to Tekton values
+    - name: name
+      value: $(body.user.name)
+    - name: message
+      value: $(body.greeting.message)
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: curl-for-echo
+spec:
+  serviceAccountName: sa-trigger
+  triggers:
+    - bindings:
+        - ref: binding-curl-trigger
+      template:
+        ref: template-curl-trigger

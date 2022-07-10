@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: my-echo
+  description: A simple echo task.
+spec:
+  params:
+  - name: name
+    type: string
+    description: Your Name for print.
+  - name: message
+    type: string
+    description: This is a message for print.
+  steps:
+  - name: echo
+    image: alpine
+    script: | 
+      #!/usr/bin/env sh
+      echo "================================"
+      echo "My Echo Task"
+      echo "================================"
+      echo "Hi, $(params.name)" 
+      echo "$(params.message)" 

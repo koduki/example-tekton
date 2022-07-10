@@ -1,0 +1,79 @@
+#
+# Service Account
+#
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-trigger
+---
+#
+# Role
+#
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: role-trigger
+rules:
+- apiGroups:
+  - triggers.tekton.dev
+  resources:
+  - eventlisteners
+  - triggers
+  - triggerbindings
+  - triggertemplates
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - tekton.dev
+  resources:
+  - pipelineruns
+  - pipelineresources
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: triggers-role-binding
+subjects:
+  - kind: ServiceAccount
+    name: sa-trigger
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: role-trigger
+---
+#
+# Cluster Role
+#
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterrole-trigger
+rules:
+- apiGroups: ["triggers.tekton.dev"]
+  resources: ["clustertriggerbindings", "clusterinterceptors"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: clusterbinding-trigger
+subjects:
+- kind: ServiceAccount
+  name: sa-trigger
+  namespace: tekton-workers
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: clusterrole-trigger
