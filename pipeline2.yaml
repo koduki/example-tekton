@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-deploy-pipeline
+spec:
+  description: | 
+    This pipeline clones a git repo, then echoes the README file to the stout.
+  params:
+  - name: git-url
+    type: string
+    description: The git repo URL to clone from.
+  - name: image
+    type: string
+    description: The git repo URL to clone from.
+  tasks:
+  - name: show-readme
+    taskRef:
+      name: sample-java-build2
+    params:
+      - name: git-url
+        value: "$(params.git-url)"
+      - name: image
+        value: "$(params.image)"

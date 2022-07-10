@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sample-java-build2
+  description: An example of Java Build with maven
+spec:
+  params:
+  - name: git-url
+    type: string
+    description: The git repo URL to clone from.
+  - name: image
+    type: string
+    description: The git repo URL to clone from.
+  steps:
+  - name: git-clone
+    image: alpine/git
+    workingDir: /workspace
+    script: | 
+      #!/usr/bin/env sh
+      echo "================================"
+      echo "Test Task"
+      echo "repos-url: $(params.git-url)" 
+      echo "image: $(params.image)" 

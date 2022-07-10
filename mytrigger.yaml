@@ -1,0 +1,55 @@
+# my-trigger.yaml
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: build-deploy-pipeline-template
+spec:
+  # Trigger Bindingが変換してくれたパラメータを利用可能
+  # PipelineRunに引き渡すパラメータを指定
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: master
+    - name: gitrepositoryurl
+      description: The git repository url
+  resourcetemplates:
+    # 見覚えのあるPipelineRunの定義
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        # PipelineRunの名前を自動生成するために`build-deploy-pipeline-run-`をランダムのIDにしてくれる
+        generateName: build-deploy-pipeline-run-
+      spec:
+        pipelineRef:
+          name: build-deploy-pipeline
+        params: 
+          # `tt` = `trigger template`の略
+          - name: git-url
+            value: $(tt.params.gitrepositoryurl)
+          - name: image
+            value: mosuke5/tekton-practice:from-pipeline
+        serviceAccountName: build-bot
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: build-deploy-pipeline-binding
+spec:
+  params:
+    # httpリクエストのパラメータをTekton内部の変数に変換
+    - name: gitrevision
+      value: $(body.head_commit.id)
+    - name: gitrepositoryurl
+      value: $(body.repository.url)
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: build-deploy-pipeline-listener
+spec:
+  serviceAccountName: trigger-sa  # EventListener Podが利用するService Account
+  triggers:
+    - bindings:
+        - ref: build-deploy-pipeline-binding
+      template:
+        ref: build-deploy-pipeline-template
